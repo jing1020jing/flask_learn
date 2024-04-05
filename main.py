@@ -30,18 +30,8 @@ def receive_data():
     temperature= data ['temperature']
     humidity=data['humidity']
     print(f"Received data    溫度：{temperature}°C，濕度：{humidity}%")
-    
-    # 呼叫 handle_message 函式處理回覆訊息
-    # # 生成時間標記
-    # timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    
-    # # 將數據存儲到 /data 子目錄下以時間戳記命名的文件中
-    # file_name = f"{timestamp}.json"
-    # file_path = os.path.join('data', file_name)
-    # with open(file_path, 'w') as f:
-    #     json.dump(data, f)
-    
     return "Data received successfully"
+
 # 監聽所有來自 /callback 的 Post Request
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -56,14 +46,8 @@ def callback():
     except InvalidSignatureError:
         abort(400)
     return 'OK'
+
 # 處理訊息
-
-# @handler.add(MessageEvent, message=TextMessage)
-# def handle_message(event):
-#     msg=str(event.message.text)
-    
-#     line_bot_api.reply_message(event.reply_token, TextSendMessage(msg))
-
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     msg = str(event.message.text)
@@ -87,10 +71,6 @@ def handle_message(event):
     else:
             reply_message=f'很抱歉，我無法知道您的意思，你可以問我"現在溫濕度是多少"或是"危險指數是多少"'
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply_message))
-# @handler.add(PostbackEvent)
-# def handle_message(event):
-#     print(event.postback.data)
-
 
 @handler.add(MemberJoinedEvent)
 def welcome(event):
@@ -98,21 +78,14 @@ def welcome(event):
     gid = event.source.group_id
     profile = line_bot_api.get_group_member_profile(gid, uid)
     name = profile.display_name
-    message = TextSendMessage(text=f'{name}歡迎加入')
+    message = TextSendMessage(text=f'{name}歡迎加入，你可以問我"現在溫濕度是多少"或是"危險指數是多少"')
     line_bot_api.reply_message(event.reply_token, message)
         
-
-
-
 @app.route("/")
 def test_XX():
     return "<p>監聽中</p>"
 
-if __name__ == '__main__':
-    
-    # # 創建 /data 子目錄
-    # os.makedirs('data', exist_ok=True)
-    
+if __name__ == '__main__':    
     port = int(os.environ.get('PORT',5000))
     app.run(host='0.0.0.0', port=port,debug=True)
 
